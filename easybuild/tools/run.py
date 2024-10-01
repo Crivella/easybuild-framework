@@ -486,7 +486,6 @@ def run_shell_cmd(cmd, fail_on_error=True, split_stderr=False, stdin=None, env=N
             # since that will always wait until EOF
             more_stdout = True
             while more_stdout:
-                # more_stdout = proc.stdout.read(read_size) or b''
                 try:
                     t = timeout - (time.time() - start) if timeout else None
                     more_stdout = read_pipe(proc.stdout, read_size, timeout=t) or b''
@@ -499,7 +498,6 @@ def run_shell_cmd(cmd, fail_on_error=True, split_stderr=False, stdin=None, env=N
             if split_stderr:
                 more_stderr = True
                 while more_stderr:
-                    # more_stderr = proc.stderr.read(read_size) or b''
                     try:
                         t = timeout - (time.time() - start) if timeout else None
                         more_stderr = read_pipe(proc.stderr, read_size, timeout=t) or b''
