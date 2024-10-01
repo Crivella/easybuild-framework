@@ -260,6 +260,7 @@ def _answer_question(stdout, proc, qa_patterns, qa_wait_patterns):
 
     return match_found
 
+
 def _read_pipe(pipe, size, output):
     """Helper function to read from a pipe and store output in a list.
     :param pipe: pipe to read from
@@ -268,6 +269,7 @@ def _read_pipe(pipe, size, output):
     """
     data = pipe.read(size)
     output.append(data)
+
 
 def read_pipe(pipe, size, timeout=None):
     """Read from a pipe using a separate thread to avoid blocking and implement a timeout.
@@ -287,6 +289,7 @@ def read_pipe(pipe, size, timeout=None):
     if t.is_alive():
         raise TimeoutError()
     return output[0]
+
 
 def terminate_process(proc, timeout=20):
     """
@@ -529,7 +532,7 @@ def run_shell_cmd(cmd, fail_on_error=True, split_stderr=False, stdin=None, env=N
     else:
         try:
             (stdout, stderr) = proc.communicate(input=stdin, timeout=timeout)
-        except subprocess.TimeoutExpired as err:
+        except subprocess.TimeoutExpired:
             error_msg = f"Timeout during `{cmd}` after {timeout} seconds"
             _log.warning(error_msg)
             terminate_process(proc)
