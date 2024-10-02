@@ -588,8 +588,8 @@ class Toolchain(object):
         self.log.debug("Defining $EB* environment variables for software named %s", name)
 
         env_vars = env_vars_external_module(name, version, metadata)
-        for key in env_vars:
-            setvar(key, env_vars[key], verbose=verbose)
+        for var, value in env_vars.items():
+            setvar(var, value, verbose=verbose)
 
     def _load_toolchain_module(self, silent=False):
         """Load toolchain module."""
@@ -1028,7 +1028,7 @@ class Toolchain(object):
 
     def handle_sysroot(self):
         """
-        Extra stuff to be done when alternate system root is specified via --sysroot EasyBuild configuration option.
+        Extra stuff to be done when alternative system root is specified via --sysroot EasyBuild configuration option.
 
         * Update $PKG_CONFIG_PATH to include sysroot location to pkg-config files (*.pc).
         """

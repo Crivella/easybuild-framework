@@ -82,6 +82,8 @@ from easybuild.tools.parallelbuild import submit_jobs
 from easybuild.tools.repository.repository import init_repository
 from easybuild.tools.systemtools import check_easybuild_deps
 from easybuild.tools.testing import create_test_report, overall_test_report, regtest, session_state
+from easybuild.tools.version import EASYBLOCKS_VERSION, FRAMEWORK_VERSION, UNKNOWN_EASYBLOCKS_VERSION
+from easybuild.tools.version import different_major_versions
 
 
 _log = None
@@ -131,10 +133,10 @@ def build_and_install_software(ecs, init_session_state, exit_on_failure=True):
 
         ec_res = {}
         try:
-            (ec_res['success'], app_log, err) = build_and_install_one(ec, init_env)
+            (ec_res['success'], app_log, err_msg, err_code) = build_and_install_one(ec, init_env)
             ec_res['log_file'] = app_log
             if not ec_res['success']:
-                ec_res['err'] = EasyBuildError(err)
+                ec_res['err'] = EasyBuildError(err_msg, exit_code=err_code)
         except Exception as err:
             # purposely catch all exceptions
             ec_res['success'] = False
@@ -172,7 +174,7 @@ def build_and_install_software(ecs, init_session_state, exit_on_failure=True):
             if not isinstance(ec_res['err'], EasyBuildError):
                 raise ec_res['err']
             else:
-                raise EasyBuildError(test_msg)
+                raise EasyBuildError(test_msg, exit_code=err_code)
 
         res.append((ec, ec_res))
 
@@ -439,9 +441,9 @@ def process_eb_args(eb_args, eb_go, cfg_settings, modtool, testing, init_session
     dry_run_mode = options.dry_run or options.dry_run_short or options.missing_modules
 
     keep_available_modules = any((
-        forced, dry_run_mode, options.extended_dry_run, any_pr_option_set, options.copy_ec, options.inject_checksums,
-        options.sanity_check_only, options.inject_checksums_to_json)
-    )
+        forced, dry_run_mode, any_pr_option_set, options.copy_ec, options.dump_env_script, options.extended_dry_run,
+        options.inject_checksums, options.inject_checksums_to_json, options.sanity_check_only
+    ))
 
     # skip modules that are already installed unless forced, or unless an option is used that warrants not skipping
     if not keep_available_modules:
@@ -614,6 +616,15 @@ def main(args=None, logfile=None, do_build=None, testing=False, modtool=None, pr
     (build_specs, _log, logfile, robot_path, search_query, eb_tmpdir, try_to_generate,
      from_pr_list, tweaked_ecs_paths) = cfg_settings
 
+    # compare running Framework and EasyBlocks versions
+    if EASYBLOCKS_VERSION == UNKNOWN_EASYBLOCKS_VERSION:
+        # most likely reason is running framework unit tests with no easyblocks installation
+        # so log a warning, to avoid test related issues
+        _log.warning("Unable to determine EasyBlocks version, so we'll assume it is not different from Framework")
+    elif different_major_versions(FRAMEWORK_VERSION, EASYBLOCKS_VERSION):
+        raise EasyBuildError("Framework (%s) and EasyBlock (%s) major versions are different." % (FRAMEWORK_VERSION,
+                                                                                                  EASYBLOCKS_VERSION))
+
     # load hook implementations (if any)
     hooks = load_hooks(options.hooks)
 
@@ -712,9 +723,11 @@ def main(args=None, logfile=None, do_build=None, testing=False, modtool=None, pr
         if options.ignore_test_failure:
             raise EasyBuildError("Found both ignore-test-failure and skip-test-step enabled. "
                                  "Please use only one of them.")
-        else:
-            print_warning("Will not run the test step as requested via skip-test-step. "
-                          "Consider using ignore-test-failure instead and verify the results afterwards")
+        print_warning("Will not run the test step as requested via skip-test-step. "
+                      "Consider using ignore-test-failure instead and verify the results afterwards")
+    if options.skip_sanity_check and options.sanity_check_only:
+        raise EasyBuildError("Found both skip-sanity-check and sanity-check-only enabled. "
+                             "Please use only one of them.")
 
     # if EasyStack file is provided, parse it, and loop over the items in the EasyStack file
     if options.easystack:
@@ -766,7 +779,7 @@ def main_with_hooks(args=None):
     try:
         init_session_state, eb_go, cfg_settings = prepare_main(args=args)
     except EasyBuildError as err:
-        print_error(err.msg)
+        print_error(err.msg, exit_code=err.exit_code)
 
     hooks = load_hooks(eb_go.options.hooks)
 
@@ -774,7 +787,7 @@ def main_with_hooks(args=None):
         main(args=args, prepared_cfg_data=(init_session_state, eb_go, cfg_settings))
     except EasyBuildError as err:
         run_hook(FAIL, hooks, args=[err])
-        print_error(err.msg, exit_on_error=True, exit_code=1)
+        print_error(err.msg, exit_on_error=True, exit_code=err.exit_code)
     except KeyboardInterrupt as err:
         run_hook(CANCEL, hooks, args=[err])
         print_error("Cancelled by user: %s" % err)
