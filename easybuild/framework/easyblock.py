@@ -80,10 +80,10 @@ from easybuild.tools.config import install_path, log_path, package_path, source_
 from easybuild.tools.environment import restore_env, sanitize_env
 from easybuild.tools.filetools import CHECKSUM_TYPE_SHA256
 from easybuild.tools.filetools import adjust_permissions, apply_patch, back_up_file, change_dir, check_lock
-from easybuild.tools.filetools import compute_checksum, convert_name, copy_file, copy_dir, create_lock, create_patch_info
+from easybuild.tools.filetools import compute_checksum, convert_name, copy_file, create_lock, create_patch_info
 from easybuild.tools.filetools import derive_alt_pypi_url, diff_files, dir_contains_files, download_file
 from easybuild.tools.filetools import encode_class_name, extract_file, find_backup_name_candidate
-from easybuild.tools.filetools import get_cwd, get_source_tarball_from_git, is_alt_pypi_url
+from easybuild.tools.filetools import copy_dir, get_cwd, get_source_tarball_from_git, is_alt_pypi_url
 from easybuild.tools.filetools import is_binary, is_sha256_checksum, mkdir, move_file, move_logs, read_file, remove_dir
 from easybuild.tools.filetools import remove_file, remove_lock, verify_checksum, weld_paths, write_file, symlink
 from easybuild.tools.hooks import BUILD_STEP, CLEANUP_STEP, CONFIGURE_STEP, EXTENSIONS_STEP, FETCH_STEP, INSTALL_STEP
@@ -181,7 +181,7 @@ class EasyBlock(object):
             self.cfg = ec
         else:
             raise EasyBuildError("Value of incorrect type passed to EasyBlock constructor: %s ('%s')", type(ec), ec)
-        
+
         # are we running in developer mode?
         self.developer = build_option('developer')
 
@@ -2676,15 +2676,17 @@ class EasyBlock(object):
             dest = os.path.join(self.builddir, dst_name)
             copy_dir(
                 developer_pth, dest,
-                ignore=lambda pth,elem: [_ for _ in elem if _ in ['.git', '.svn', '.hg']]
+                ignore=lambda pth, elem: [_ for _ in elem if _ in ['.git', '.svn', '.hg']]
             )
             self.cfg['start_dir'] = dest
             self.log.info("Content of develop path %s copied to %s (new start_dir)", developer_pth, dest)
         else:
             for src in self.src:
                 self.log.info("Unpacking source %s" % src['name'])
-                srcdir = extract_file(src['path'], self.builddir, cmd=src['cmd'],
-                                    extra_options=self.cfg['unpack_options'], change_into_dir=False)
+                srcdir = extract_file(
+                    src['path'], self.builddir, cmd=src['cmd'],
+                    extra_options=self.cfg['unpack_options'], change_into_dir=False
+                )
                 change_dir(srcdir)
                 if srcdir:
                     self.src[self.src.index(src)]['finalpath'] = srcdir
