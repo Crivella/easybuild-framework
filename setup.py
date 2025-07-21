@@ -123,6 +123,12 @@ implement support for installing particular (groups of) software packages.""",
     extras_require={
         'eb_click': ['click', 'rich', 'rich_click'],
     },
+    entry_points={
+        'console_scripts': [
+            'eb2 = easybuild.cli:eb',
+            'eb3 = easybuild.cli3:eb',
+        ]
+    },
     data_files=[
         ('easybuild/scripts', glob.glob('easybuild/scripts/*')),
         ('etc', glob.glob('etc/*')),
