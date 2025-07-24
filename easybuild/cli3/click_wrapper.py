@@ -9,10 +9,12 @@ except ImportError:
     import click
 else:
     HAVE_RICH_CLICK = True
+    # HAVE_RICH_CLICK = False
     OPT_GROUP = click.rich_click.OPTION_GROUPS
     OPT_GROUP.clear()  # Clear existing groups to avoid conflicts
 
     from rich.traceback import install
+    # install(suppress=[click, _click])
 
 
 def fancy_install_tracebacks():

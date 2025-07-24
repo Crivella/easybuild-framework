@@ -67,7 +67,8 @@ def load_configurations(cfg_paths: list[str] = None):
     for path in cfg_paths:
         config = parse_config_file_by_extension(path)
         for section, options in config.items():
-            ptr = final_config.setdefault(section, {})
-            ptr.update(options)
+            # ptr = final_config.setdefault(section, {})
+            # ptr.update(options)
+            final_config.update(options)
 
     return final_config
