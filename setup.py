@@ -126,7 +126,7 @@ implement support for installing particular (groups of) software packages.""",
     entry_points={
         'console_scripts': [
             'eb2 = easybuild.cli:eb',
-            'eb3 = easybuild.cli3:eb',
+            'eb3 = easybuild.cli3:eb3',
         ]
     },
     data_files=[

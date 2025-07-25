@@ -17,12 +17,11 @@ class EasyconfigParam(click.ParamType):
 
 class DelimitedPathList(click.Path):
     """Custom Click parameter type for delimited lists."""
-    name = 'pathlist'
-
     def __init__(self, *args, delimiter=',', resolve_full: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.delimiter = delimiter
         self.resolve_full = resolve_full
+        self.name = f'[PATH[{self.delimiter}PATH]]'
 
     def convert(self, value, param, ctx):
         # logging.warning(f"{param=} convert called with `{value=}`, `{type(value)=}`")
@@ -63,11 +62,10 @@ class DelimitedPathList(click.Path):
 
 class DelimitedString(click.ParamType):
     """Custom Click parameter type for delimited strings."""
-    name = 'strlist'
-
     def __init__(self, *args, delimiter=',', **kwargs):
         super().__init__(*args, **kwargs)
         self.delimiter = delimiter
+        self.name = f'[STR[{self.delimiter}STR]]'
 
     def convert(self, value, param, ctx):
         if isinstance(value, str):

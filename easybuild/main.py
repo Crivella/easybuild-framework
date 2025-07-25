@@ -408,6 +408,8 @@ def process_eb_args(eb_args, eb_go, cfg_settings, modtool, testing, init_session
     copy_ec = options.copy_ec and not tweaked_ecs_paths
 
     if copy_ec or options.fix_deprecated_easyconfigs or options.show_ec:
+        print(eb_args, robot_path, locate_files(eb_args, robot_path))
+        return
 
         if options.copy_ec:
             # at this point some paths may still just be filenames rather than absolute paths,
