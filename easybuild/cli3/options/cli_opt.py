@@ -22,16 +22,16 @@ def register_hidden_param(ctx: click.Context, param: click.Parameter, value):
     ctx.obj['hidden_params'][param.name] = value
     # logging.warning(f"Registered hidden parameter: {param.name} with value: {value}  {param.value_from_envvar(ctx)}")
 
-def single_callback(func, *args, **kwargs):
+def single_callback(func):
     """Decorator to register a single callback function."""
-    return list_callback([func], *args, **kwargs)
+    return list_callback([func])
 
-def list_callback(func_lst, *args, **kwargs):
+def list_callback(func_lst):
     """Decorator to register a callback function for lists."""
-    def wrapped(*args, **kwargs):
-        register_hidden_param(*args, **kwargs)
+    def wrapped(ctx: click.Context, param: click.Parameter, value):
         for func in func_lst:
-            func(*args, **kwargs)
+            value = func(ctx, param, value)
+        register_hidden_param(ctx, param, value)
     return wrapped
 
 

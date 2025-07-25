@@ -16,6 +16,15 @@ else:
     from rich.traceback import install
     # install(suppress=[click, _click])
 
+def disable_rich():
+    """Disable rich formatting in Click."""
+    global HAVE_RICH_CLICK
+    HAVE_RICH_CLICK = False
+
+def get_have_rich_click():
+    """Return whether rich Click is available."""
+    return HAVE_RICH_CLICK
+
 
 def fancy_install_tracebacks():
     """Install rich traceback handler for Click."""
