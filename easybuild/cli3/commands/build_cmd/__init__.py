@@ -1,6 +1,6 @@
-from .. import eb3
-from ..click_wrapper import click
-from .. import types as ctyp
+from ... import eb3
+from ...click_wrapper import click
+from ... import types as ctyp
 
 @eb3.command()
 @click.argument('easyconfigs', nargs=-1, type=ctyp.EasyconfigParam(), required=True)

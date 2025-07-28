@@ -4,7 +4,7 @@ from easybuild.tools.systemtools import UNKNOWN, get_cpu_architecture, get_cpu_f
 from easybuild.tools.systemtools import get_cpu_features, get_gpu_info, get_system_info
 
 from . import show
-from ..click_wrapper import click
+from ...click_wrapper import click
 
 @show.command()
 def system_info():
@@ -58,3 +58,7 @@ def system_info():
     ])
 
     click.echo("\n".join(lines))
+
+__all__ = [
+    'system_info',
+]

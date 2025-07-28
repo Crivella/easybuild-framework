@@ -1,4 +1,3 @@
-# import logging
 import os
 from click.shell_completion import CompletionItem
 from easybuild.tools.options import set_up_configuration
@@ -17,11 +16,12 @@ class EasyconfigParam(click.ParamType):
 
 class DelimitedPathList(click.Path):
     """Custom Click parameter type for delimited lists."""
-    def __init__(self, *args, delimiter=',', resolve_full: bool = True, **kwargs):
+    def __init__(self, *args,delimiter=',', **kwargs):
+        kwargs.setdefault('resolve_path', True)
         super().__init__(*args, **kwargs)
         self.delimiter = delimiter
-        self.resolve_full = resolve_full
-        self.name = f'[PATH[{self.delimiter}PATH]]'
+        name = self.name
+        self.name = f'[{name}[{self.delimiter}{name}]]'
 
     def convert(self, value, param, ctx):
         # logging.warning(f"{param=} convert called with `{value=}`, `{type(value)=}`")
@@ -31,7 +31,7 @@ class DelimitedPathList(click.Path):
             res = value
         else:
             raise click.BadParameter(f"Expected a comma-separated string, got {value}")
-        if self.resolve_full:
+        if self.resolve_path:
             res = [os.path.abspath(v) for v in res]
         # logging.warning(f"{param=} convert returning `{res=}`")
         return res
@@ -42,6 +42,7 @@ class DelimitedPathList(click.Path):
         dir_path, prefix = os.path.split(last)
         dir_path = dir_path or '.'
         # logging.warning(f"Shell completion for delimited path list: dir_path={dir_path}, prefix={prefix}")
+
         possibles = []
         for path in os.listdir(dir_path):
             if not path.startswith(prefix):
@@ -54,6 +55,9 @@ class DelimitedPathList(click.Path):
             elif os.path.isfile(full_path):
                 if self.file_okay:
                     possibles.append(full_path)
+        # possibles = super().shell_complete(ctx, param, last)
+        # logging.warning(f"Shell completion for delimited path list: possibles={possibles}")
+
         start = f'{others}{self.delimiter}' if others else ''
         res = [CompletionItem(f"{start}{path}") for path in possibles]
         # logging.warning(f"Shell completion for delimited path list: res={possibles}")

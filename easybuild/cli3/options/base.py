@@ -69,7 +69,7 @@ def eb_option(
     decls = []
     if is_flag:
         # decls.append(f'--{long}/--disable-{long}')
-        default = kwargs.pop('default', None)
+        default = kwargs.get('default', False)
         if default:
             decls.append(f'--{long}/--disable-{long}')
         else:

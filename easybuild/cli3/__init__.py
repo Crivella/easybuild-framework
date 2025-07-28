@@ -87,7 +87,7 @@ def output_style_callback(ctx, param, value):
 def eb3(ctx):
     """EasyBuild command line interface."""
     fancy_install_tracebacks()
-    click.echo(f'OPT_GROUP: {OPT_GROUP}')
+    # click.echo(f'OPT_GROUP: {OPT_GROUP}')
     # for k,v in ctx.obj['hidden_params'].items():
     #     # logging.warning(f"Registered hidden parameter: {k} with value: {v}")
     #     click.echo(f"Registering hidden parameter: {k} with value: {v}")
@@ -97,20 +97,4 @@ def eb3(ctx):
     #         continue
     #     print(f"|    {k}: {v}")
 
-
-
-
-
-# @eb.group()
-# def github():
-#     """GitHub related commands."""
-
-# @github.command()
-# def sync_pr_with_develop():
-#     """Sync a pull request with the develop branch."""
-#     # Placeholder for sync PR logic
-#     print("Syncing PR with develop...")
-
-# Import all subcommands to make the CLI aware of them
-from .build_cmd import *
-from .show import *
+from .commands import *
