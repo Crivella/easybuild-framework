@@ -1,10 +1,10 @@
 import os
 import re
 from click.shell_completion import CompletionItem
-from easybuild.tools.options import set_up_configuration
 from easybuild.tools.robot import search_easyconfigs
 
 from .click_wrapper import click
+from.options.base import build_options
 
 
 class EasyconfigParam(click.ParamType):
@@ -13,8 +13,11 @@ class EasyconfigParam(click.ParamType):
 
     def shell_complete(self, ctx, param, incomplete):
         incomplete = re.escape(incomplete)
-        set_up_configuration(args=["--ignore-index"], silent=True, reconfigure=True)
-        return [CompletionItem(ec) for ec in search_easyconfigs(fr'^{incomplete}.*(?<=\.eb)$', filename_only=True)]
+        terse = build_options._FrozenDict__dict['terse']
+        build_options._FrozenDict__dict['terse'] = True
+        res = [CompletionItem(ec) for ec in search_easyconfigs(fr'^{incomplete}.*(?<=\.eb)$', filename_only=True)]
+        build_options._FrozenDict__dict['terse'] = terse
+        return res
 
 class DelimitedPathList(click.Path):
     """Custom Click parameter type for delimited lists."""

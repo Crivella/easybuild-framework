@@ -38,6 +38,12 @@ def robot_paths_callback(ctx, param, value):
     return value
 
 
+EB_CONSIDER_ARCHIVED_EASYVONFIGS_OPTION = eb_option(
+    '--consider-archived-easyconfigs',
+    is_flag=True,
+    help='Consider archived easyconfigs when resolving dependencies',
+)
+
 EB_DRY_RUN_OPTION = eb_option(
     '--dry-run',
     is_flag=True,
@@ -124,17 +130,18 @@ EB_REBUILD_OPTION = eb_option(
 EB_ROBOT_OPTION = eb_option(
     '--robot',
     is_eager=True,
-    is_flag=False,
-    flag_value=[''],
+    is_flag=True,
+    # flag_value=[''],
     short='r',
-    type=ctyp.DelimitedPathList(delimiter=',', file_okay=False),
+    # type=ctyp.DelimitedPathList(delimiter=',', file_okay=False, resolve_path=False),
     help='Enable dependency resolution, optionally consider additional paths to search for easyconfigs',
+    # callback=robot_paths_callback,
 )
 
 EB_ROBOT_PATHS_OPTION = eb_option(
-    '--robot-paths',
+    '--robot-path',
     is_eager=True,
-    type=ctyp.DelimitedPathList(delimiter=',', file_okay=False),
+    type=ctyp.DelimitedPathList(delimiter=':', file_okay=False, resolve_path=False),
     help='Additional paths to consider by robot for easyconfigs (--robot PATHs get priority)',
     callback=robot_paths_callback,
 )
