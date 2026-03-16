@@ -18,7 +18,7 @@ def notimpl_callback(ctx: click.Context, param: click.Parameter, value):
 def register_hidden_param(ctx: click.Context, param: click.Parameter, value):
     """Register a hidden parameter in the context."""
     ctx.ensure_object(dict)
-    param.value_from_envvar
+    # param.value_from_envvar
 
     ctx.obj[param.name] = value
     build_options._FrozenDict__dict[param.name] = value
