@@ -6,7 +6,14 @@ from easybuild.tools.systemtools import get_cpu_features, get_gpu_info, get_syst
 from . import show
 from ...click_wrapper import click
 
-@show.command()
+
+def no_help_command(*args, **kwargs):
+    """Decorator to create a command that is hidden from help output."""
+    kwargs.setdefault('add_help_option', False)
+    return show.command(*args, **kwargs)
+
+
+@no_help_command()
 def system_info():
     """Show system information."""
     system_info = get_system_info()

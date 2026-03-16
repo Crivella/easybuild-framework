@@ -8,20 +8,26 @@ from .utils import avail_list
 from ...click_wrapper import click, get_have_rich_click
 
 
-@show.command()
+def no_help_command(*args, **kwargs):
+    """Decorator to create a command that is hidden from help output."""
+    kwargs.setdefault('add_help_option', False)
+    return show.command(*args, **kwargs)
+
+
+@no_help_command()
 def module_naming_schemes():
     """Show all supported module naming schemes."""
     schemes = avail_module_naming_schemes()
     avail_list("module naming schemes", schemes)
 
 
-@show.command()
+@no_help_command()
 def module_tools():
     """Show all supported modules tools."""
     avail_list("module tools", avail_modules_tools())
 
 
-@show.command()
+@no_help_command()
 def avail_repositories():
     """Show list of known repository types."""
     repopath_defaults = [mk_full_default_path('repositorypath')]

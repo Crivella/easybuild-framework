@@ -1,36 +1,12 @@
-import logging
-import os
-
-from easybuild.main import main_with_hooks
 from easybuild.tools.version import this_is_easybuild
-from easybuild.framework.easyconfig import EASYCONFIGS_PKG_SUBDIR
-from easybuild.framework.easyconfig.tools import get_paths_for
 
 from .click_wrapper import click, fancy_install_tracebacks, disable_rich, HAVE_RICH_CLICK
-from . import types as ctyp
 from . import options as opt
-from .options.base import OPT_GROUP
 
 
 def version_callback(ctx, param, value):
     click.echo(this_is_easybuild())
     ctx.exit()
-
-def robot_paths_callback(ctx, param, value):
-    """Callback for the --robot-paths option."""
-    if value is None:
-        value = get_paths_for(subdir=EASYCONFIGS_PKG_SUBDIR, robot_path=None) or []
-    flattened = sum((item.split(os.pathsep) for item in value), start=[])
-    if flattened and flattened[0] == '':
-        default = get_paths_for(subdir=EASYCONFIGS_PKG_SUBDIR, robot_path=None)
-        value = default + flattened
-    elif flattened and flattened[-1] == '':
-        default = get_paths_for(subdir=EASYCONFIGS_PKG_SUBDIR, robot_path=None)
-        value = flattened + default
-
-    value = list(filter(None, value))  # Remove empty strings
-
-    return value
 
 
 def output_style_callback(ctx, param, value):
@@ -39,8 +15,6 @@ def output_style_callback(ctx, param, value):
         disable_rich()
     return value
 
-
-        # raise NotImplementedError(f"The option {param.name} is not implemented yet.")
 
 @click.group()
 @click.option(

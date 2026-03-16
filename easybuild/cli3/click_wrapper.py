@@ -3,7 +3,6 @@ import click as _click
 OPT_GROUP = {}
 HAVE_RICH_CLICK = False
 try:
-    import click as _click
     import rich_click as click
     # raise ImportError("Simulating ImportError for rich_click to test fallback")
 except ImportError:
