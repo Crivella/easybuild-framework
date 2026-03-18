@@ -1,13 +1,19 @@
 from functools import wraps
 
 from easybuild.tools.config import BuildOptions
+from easybuild.base import fancylogger
 
 from ..click_wrapper import click, OPT_GROUP
 
 CONFIG_ENV_VAR_PREFIX = 'EASYBUILD'
-import logging
 
 build_options = BuildOptions()
+
+_log = fancylogger.getLogger('options')
+if fancylogger._env_to_boolean('DEBUG_EASYBUILD_OPTIONS', default=False):
+    fancylogger.logToScreen(enable=True)
+    # fancylogger.setLogLevel('DEBUG')
+    _log.setLevel('DEBUG')
 
 def notimpl_callback(ctx: click.Context, param: click.Parameter, value):
     """Callback for options that are not implemented yet."""
@@ -18,10 +24,12 @@ def notimpl_callback(ctx: click.Context, param: click.Parameter, value):
 def register_hidden_param(ctx: click.Context, param: click.Parameter, value):
     """Register a hidden parameter in the context."""
     ctx.ensure_object(dict)
-    # param.value_from_envvar
+    param.value_from_envvar
 
     ctx.obj[param.name] = value
     build_options._FrozenDict__dict[param.name] = value
+
+    _log.debug(f"Registered parameter: {param.name} with value: {value}")
 
 def single_callback(func):
     """Decorator to register a single callback function."""
