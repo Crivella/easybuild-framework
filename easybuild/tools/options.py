@@ -1969,6 +1969,145 @@ def set_up_configuration(args=None, logfile=None, testing=False, silent=False, r
                    from_prs, tweaked_ecs_paths)
 
 
+def set_up_configuration2(args=None, logfile=None, testing=False, silent=False, reconfigure=False):
+    """
+    Set up EasyBuild configuration, by parsing configuration settings & initialising build options.
+
+    :param args: command line arguments to take into account when parsing the EasyBuild configuration settings
+    :param logfile: log file to use
+    :param testing: enable testing mode
+    :param silent: stay silent (no printing)
+    :param reconfigure: reconfigure singletons that hold configuration dictionaries. Use with care: normally,
+    configuration shouldn't be changed during a run. Exceptions are when looping over items in EasyStack files
+    """
+
+    # set up fake 'vsc' Python package, to catch easyblocks/scripts that still import from vsc.* namespace
+    # this must be done early on, to catch imports from the vsc namespace in modules included via --include-*
+    # fake_vsc_path = install_fake_vsc()
+
+    # parse EasyBuild configuration settings
+    # eb_go = parse_options(args=args)
+    # print(eb_go)
+    # options = eb_go.options
+
+    # check_options(options)
+
+    # tmpdir is set by option parser via set_tmpdir function
+    tmpdir = tempfile.gettempdir()
+
+    class OptionsProxy:
+        def __getattr__(self, item):
+            return build_option(item)
+    options = OptionsProxy()
+
+    # set umask (as early as possible)
+    if options.umask is not None:
+        new_umask = int(options.umask, 8)
+        old_umask = os.umask(new_umask)
+
+    # search_query = options.search or options.search_filename or options.search_short
+
+    # initialise logging for main
+    # log, logfile = init_logging(logfile, logtostdout=options.logtostdout,
+    #                             silent=(testing or options.terse or silent),
+    #                             colorize=options.color, tmp_logdir=options.tmp_logdir)
+
+    # log startup info (must be done after setting up logger)
+    # eb_cmd_line = eb_go.generate_cmd_line() + eb_go.args
+    # print(f'{eb_cmd_line=}')
+    # log_start(log, eb_cmd_line, tmpdir)
+
+    # can't log umask setting before logger is set up...
+    if options.umask is not None:
+        log.info("umask set to '%s' (used to be '%s')", oct(new_umask), oct(old_umask))
+
+    # disallow running EasyBuild as root (by default)
+    check_root_usage(allow_use_as_root=options.allow_use_as_root_and_accept_consequences)
+
+    # process software build specifications (if any), i.e.
+    # software name/version, toolchain name/version, extra patches, ...
+    # (try_to_generate, build_specs) = process_software_build_specs(options)
+
+    # map list of strings --from-pr value to list of integers
+    # try:
+    #     from_prs = [int(x) for x in options.from_pr]
+    # except ValueError:
+    #     raise EasyBuildError(
+    #         "Argument to --from-pr must be a comma separated list of PR #s.",
+    #         exit_code=EasyBuildExit.OPTION_ERROR
+    #     )
+
+    # try:
+    #     review_pr = (lambda x: int(x) if x else None)(options.review_pr)
+    # except ValueError:
+    #     raise EasyBuildError(
+    #         "Argument to --review-pr must be an integer PR #.",
+    #         exit_code=EasyBuildExit.OPTION_ERROR
+    #     )
+
+    # determine robot path
+    # --try-X, --dep-graph, --search use robot path for searching, so enable it with path of installed easyconfigs
+    # tweaked_ecs = try_to_generate and build_specs
+    # tweaked_ecs_paths, extra_ec_paths = alt_easyconfig_paths(tmpdir, tweaked_ecs=tweaked_ecs, from_prs=from_prs,
+    #                                                          from_commit=eb_go.options.from_commit,
+    #                                                          review_pr=review_pr)
+    # auto_robot = try_to_generate or options.check_conflicts or options.dep_graph or search_query
+    # robot_path = det_robot_path(options.robot_paths, tweaked_ecs_paths, extra_ec_paths, auto_robot=auto_robot)
+    # log.debug("Full robot path: %s", robot_path)
+
+    # if not robot_path:
+    #     print_warning("Robot search path is empty!")
+
+    # new_update_opt = options.new_pr or options.new_pr_from_branch or options.update_branch_github or options.update_pr
+
+    # configure & initialize build options
+    # config_options_dict = eb_go.get_options_by_section('config')
+    # build_options = {
+    #     'build_specs': build_specs,
+    #     'command_line': eb_cmd_line,
+    #     'external_modules_metadata': parse_external_modules_metadata(options.external_modules_metadata),
+    #     'extra_ec_paths': extra_ec_paths,
+    #     'robot_path': robot_path,
+    #     'silent': testing or new_update_opt,
+    #     'try_to_generate': try_to_generate,
+    #     'valid_stops': [x[0] for x in EasyBlock.get_steps()],
+    # }
+
+    # Remove existing singletons if reconfigure==True (allows reconfiguration when looping over EasyStack items)
+    # if reconfigure:
+    #     BuildOptions.__class__._instances.clear()
+    #     ConfigurationVariables.__class__._instances.clear()
+    # elif len(BuildOptions.__class__._instances) + len(ConfigurationVariables.__class__._instances) > 0:
+    #     msg = '\n'.join([
+    #         "set_up_configuration is about to call init() and init_build_options().",
+    #         "However, the singletons that these functions normally initialize already exist.",
+    #         "If configuration should be changed, this may lead to unexpected behavior,"
+    #         "as the existing singletons will be returned. If you intended to reconfigure",
+    #         "you should probably pass reconfigure=True to set_up_configuration()."
+    #     ])
+    #     print_warning(msg, log=log)
+
+    # initialise the EasyBuild configuration & build options
+    # init(options, config_options_dict)
+    # init_build_options(build_options=build_options, cmdline_options=options)
+
+    # done here instead of in _postprocess_include because github integration requires build_options to be initialized
+    # handle_include_easyblocks_from(options, log)
+
+    check_python_version()
+
+    # move directory containing fake vsc namespace into temporary directory used for this session
+    # (to ensure it gets cleaned up properly)
+    # new_fake_vsc_path = os.path.join(tmpdir, os.path.basename(fake_vsc_path))
+    # print(f'Moving fake vsc path from {fake_vsc_path} to {new_fake_vsc_path}')
+    # move_file(fake_vsc_path, new_fake_vsc_path, force_in_dry_run=True)
+    # sys.path.remove(fake_vsc_path)
+    # sys.path.insert(0, new_fake_vsc_path)
+
+
+    return (log, logfile, tmpdir)
+
+
 def process_software_build_specs(options):
     """
     Create a dictionary with specified software build options.
@@ -1978,6 +2117,9 @@ def process_software_build_specs(options):
     try_to_generate = False
     build_specs = {}
     logger = fancylogger.getLogger()
+
+    # print(f'{options.software_name=}, {options.software_version=}, {options.toolchain_name=}, {options.toolchain_version=}')
+    # print(f'{options.try_software_name=}, {options.try_software_version=}, {options.try_toolchain_name=}, {options.try_toolchain_version=}, ')
 
     # regular options: don't try to generate easyconfig, and search
     opts_map = {

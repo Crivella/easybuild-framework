@@ -5,16 +5,14 @@ import json
 
 from easybuild.tools.build_log import EasyBuildError
 
-from .base import eb_option as _eb_option, notimpl_callback
+from .base import OptionsGroup
 from .. import types as ctyp
 
-GROUP = "Configfiles Options"
-_OPTIONS = []
-def eb_option(*args, **kwargs):
-    """Decorator to create an EasyBuild configuration option."""
-    res = _eb_option(*args, group=GROUP, **kwargs)
-    _OPTIONS.append(res)
-    return res
+
+EB_CONFIGFILES_OPTIONS = OptionsGroup(
+    "Configuration file options",
+    "Options related to EasyBuild configuration files.",
+)
 
 def parse_config_file(file_path):
     """Parse a configuration file and return a dictionary of options."""
@@ -92,7 +90,7 @@ def configfile_callback(ctx, param, value):
 
 
 
-EB_CONFIGFILES_OPTION = eb_option(
+EB_CONFIGFILES_OPTION = EB_CONFIGFILES_OPTIONS.eb_option(
     '--configfiles',
     is_eager=True,
     type=ctyp.DelimitedPathList(delimiter=','),
@@ -100,17 +98,9 @@ EB_CONFIGFILES_OPTION = eb_option(
     help='Load EasyBuild configuration files.',
 )
 
-EB_IGNORE_CONFIGFILES_OPTION = eb_option(
+EB_IGNORE_CONFIGFILES_OPTION = EB_CONFIGFILES_OPTIONS.eb_option(
     '--ignoreconfigfiles',
     is_eager=True,
     type=ctyp.DelimitedPathList(delimiter=','),
-    callback=notimpl_callback,
     help='Ignore EasyBuild configuration files.',
 )
-
-def EB_CONFIGFILES_OPTIONS(func):
-    """Decorator to add EasyBuild configuration file options."""
-    for opt in _OPTIONS:
-        func = opt(func)
-
-    return func
